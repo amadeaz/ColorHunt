@@ -1,37 +1,45 @@
 <!DOCTYPE html>
-<html lang="id" class="h-full w-full overflow-hidden select-none">
+<html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Color Hunt - Mobile App Mode</title>
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Color Hunt - Game Cari Warna</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Canvas Confetti -->
+  <!-- Google Fonts: Fredoka & Quicksand -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Quicksand:wght@500;700;800&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- JS Canvas Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  
-  <!-- Font Family -->
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
+
   <script>
     tailwind.config = {
       theme: {
         extend: {
+          colors: {
+            brand: {
+              blue: '#3B82F6',
+              darkBlue: '#1D4ED8',
+              sky: '#93C5FD',
+              yellow: '#FACC15',
+              warmYellow: '#EAB308',
+              cream: '#FEFCE8',
+              bgSoft: '#EFF6FF',
+            }
+          },
           fontFamily: {
             fredoka: ['Fredoka', 'sans-serif'],
-          },
-          colors: {
-            gameBlue: '#3B82F6',
-            gameDarkBlue: '#1D4ED8',
-            gameYellow: '#FACC15',
-            gameDarkYellow: '#EAB308',
-            gameBg: '#EFF6FF',
+            quicksand: ['Quicksand', 'sans-serif'],
           },
           boxShadow: {
-            'pop': '0px 5px 0px 0px rgba(0,0,0,0.15)',
-            'pop-lg': '0px 8px 0px 0px rgba(0,0,0,0.18)',
-            'pop-sm': '0px 3px 0px 0px rgba(0,0,0,0.15)',
+            'pop': '0px 6px 0px 0px #1D4ED8',
+            'pop-yellow': '0px 6px 0px 0px #CA8A04',
+            'pop-btn': '0px 5px 0px 0px #1E40AF',
+            'pop-yellow-btn': '0px 5px 0px 0px #CA8A04',
+            'pop-red-btn': '0px 5px 0px 0px #991B1B',
           }
         }
       }
@@ -40,633 +48,692 @@
 
   <style>
     body {
+      font-family: 'Quicksand', sans-serif;
+      background-color: #DBEAFE;
+      user-select: none;
+    }
+    h1, h2, h3, .font-cartoon {
       font-family: 'Fredoka', sans-serif;
-      touch-action: manipulation;
-      height: 100dvh;
-      width: 100vw;
-      overflow: hidden;
-      background-color: #EFF6FF;
     }
     
-    .cartoon-border {
-      border: 3px solid #1D4ED8;
+    .btn-cartoon {
+      transition: all 0.1s ease;
     }
-    .cartoon-border-sm {
-      border: 2px solid #1D4ED8;
-    }
-    
-    .pulse-alarm {
-      animation: pulse-red 0.5s infinite alternate;
-    }
-    
-    @keyframes pulse-red {
-      0% { background-color: rgba(239, 68, 68, 0.2); }
-      100% { background-color: rgba(239, 68, 68, 0.7); }
+    .btn-cartoon:active {
+      transform: translateY(4px);
+      box-shadow: 0px 1px 0px 0px transparent !important;
     }
 
-    /* Modal Backdrop Blur */
+    @keyframes bounce-gentle {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .animate-bounce-gentle {
+      animation: bounce-gentle 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse-alarm {
+      0%, 100% { background-color: rgba(239, 68, 68, 0.15); transform: scale(1); }
+      50% { background-color: rgba(239, 68, 68, 0.4); transform: scale(1.05); }
+    }
+    .animate-alarm {
+      animation: pulse-alarm 0.35s infinite ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px) rotate(-2deg); }
+      75% { transform: translateX(4px) rotate(2deg); }
+    }
+    .animate-shake {
+      animation: shake 0.15s infinite ease-in-out;
+    }
+
     .modal-backdrop {
-      background-color: rgba(15, 23, 42, 0.65);
-      backdrop-filter: blur(4px);
+      background-color: rgba(30, 58, 138, 0.7);
+      backdrop-filter: blur(5px);
     }
   </style>
 </head>
-<body class="flex flex-col justify-between items-center text-slate-800 p-3 max-w-md mx-auto relative h-full">
+<body class="min-h-screen flex items-center justify-center p-2 sm:p-4">
 
-  <!-- TOP APP BAR -->
-  <header class="w-full bg-gameBlue text-white rounded-2xl p-2.5 px-4 flex justify-between items-center cartoon-border shadow-pop flex-shrink-0 z-10">
-    <div class="flex items-center gap-2">
-      <span class="text-xl">📷</span>
-      <h1 class="font-bold text-lg tracking-wide uppercase">COLOR HUNT</h1>
-    </div>
-    <div class="flex items-center gap-2">
-      <button id="soundToggleBtn" onclick="toggleSound()" class="p-1.5 bg-blue-600 rounded-xl active:scale-95 transition-transform text-xs">
-        🔊
-      </button>
-      <span class="bg-gameYellow text-gameDarkBlue text-xs font-bold px-2.5 py-1 rounded-full cartoon-border-sm">
-        1 ROUND
-      </span>
-    </div>
-  </header>
+  <!-- Main Game Frame -->
+  <div class="w-full max-w-sm h-[840px] max-h-[96vh] bg-brand-bgSoft border-8 border-brand-darkBlue rounded-[40px] shadow-2xl overflow-hidden relative flex flex-col justify-between">
 
-  <!-- SCREEN 1: HOME / SETUP SCREEN -->
-  <main id="setupScreen" class="w-full flex-1 flex flex-col justify-between my-2 overflow-hidden">
-    
-    <!-- Hero / Title -->
-    <div class="text-center my-auto flex flex-col items-center">
-      <div class="w-16 h-16 bg-gameYellow rounded-2xl cartoon-border flex items-center justify-center text-3xl shadow-pop mb-2 animate-bounce">
-        🎨
+    <!-- Top Status Bar -->
+    <div class="w-full bg-brand-blue text-white px-5 pt-3 pb-2 flex justify-between items-center text-xs font-bold rounded-t-[30px] z-20">
+      <div class="flex items-center gap-1.5">
+        <i class="fa-solid fa-camera-retro text-brand-yellow text-base"></i>
+        <span class="tracking-wide font-cartoon text-sm">COLOR HUNT</span>
       </div>
-      <h2 class="text-2xl font-black text-gameDarkBlue tracking-wide">COLOR HUNT!</h2>
-      <p class="text-xs font-medium text-slate-600 px-4 mt-0.5">Cari benda dengan warna yang cocok bersama teman-temanmu!</p>
-    </div>
-
-    <!-- Configuration Card -->
-    <div class="bg-white rounded-2xl p-3.5 cartoon-border shadow-pop flex flex-col gap-3 my-auto">
-      
-      <!-- Player Count Selection -->
-      <div>
-        <label class="text-xs font-bold text-gameDarkBlue uppercase flex items-center gap-1 mb-1.5">
-          <span>👥</span> Jumlah Player
-        </label>
-        <div class="grid grid-cols-4 gap-1.5" id="playerCountSelector">
-          <button onclick="setPlayerCount(1)" class="pc-btn py-1.5 rounded-xl border-2 border-slate-300 font-bold text-sm hover:border-gameBlue active:scale-95">1</button>
-          <button onclick="setPlayerCount(2)" class="pc-btn py-1.5 rounded-xl border-2 border-slate-300 font-bold text-sm hover:border-gameBlue active:scale-95">2</button>
-          <button onclick="setPlayerCount(3)" class="pc-btn py-1.5 rounded-xl border-2 border-slate-300 font-bold text-sm hover:border-gameBlue active:scale-95">3</button>
-          <button onclick="setPlayerCount(4)" class="pc-btn py-1.5 rounded-xl border-2 border-slate-300 font-bold text-sm hover:border-gameBlue active:scale-95">4</button>
-        </div>
-      </div>
-
-      <!-- Player Name Inputs Container -->
-      <div id="playerInputsContainer" class="flex flex-col gap-1.5 max-h-36 overflow-y-auto pr-1">
-        <!-- Input fields auto-generated by JS -->
-      </div>
-
-      <!-- Search Timer Selection -->
-      <div class="border-t border-slate-200 pt-2">
-        <label class="text-xs font-bold text-gameDarkBlue uppercase flex items-center gap-1 mb-1.5">
-          <span>⏰</span> Durasi Nyari Benda
-        </label>
-        <div class="grid grid-cols-4 gap-1.5" id="timerSelector">
-          <button onclick="setTimerDuration(10)" class="timer-btn py-1 rounded-xl border-2 border-slate-300 font-bold text-xs hover:border-gameBlue active:scale-95">10s</button>
-          <button onclick="setTimerDuration(15)" class="timer-btn py-1 rounded-xl border-2 border-slate-300 font-bold text-xs hover:border-gameBlue active:scale-95">15s</button>
-          <button onclick="setTimerDuration(20)" class="timer-btn py-1 rounded-xl border-2 border-slate-300 font-bold text-xs hover:border-gameBlue active:scale-95">20s</button>
-          <button onclick="setTimerDuration(30)" class="timer-btn py-1 rounded-xl border-2 border-slate-300 font-bold text-xs hover:border-gameBlue active:scale-95">30s</button>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Start Game Button -->
-    <button onclick="startGame()" class="w-full bg-gameYellow hover:bg-yellow-300 text-gameDarkBlue font-black text-lg py-3 rounded-2xl cartoon-border shadow-pop active:scale-98 transition-transform uppercase tracking-wider flex items-center justify-center gap-2 flex-shrink-0 mt-2">
-      <span>▶</span> MULAI GAME!
-    </button>
-  </main>
-
-  <!-- SCREEN 2: GLOBAL COUNTDOWN / HUNTING SCREEN -->
-  <main id="huntScreen" class="w-full flex-1 flex-col justify-between items-center my-2 hidden overflow-hidden">
-    
-    <!-- Target Color Card Header -->
-    <div class="w-full bg-white rounded-2xl p-3 text-center cartoon-border shadow-pop flex flex-col items-center flex-shrink-0">
-      <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Target Warna Benda</span>
-      <div id="targetColorCircle" class="w-14 h-14 rounded-full cartoon-border my-1.5 shadow-md flex items-center justify-center transition-all duration-300"></div>
-      <h3 id="targetColorName" class="text-xl font-black text-gameDarkBlue">HIJAU ZAMRUD</h3>
-    </div>
-
-    <!-- Global Timer Centerpiece -->
-    <div id="timerContainer" class="my-auto w-full flex flex-col items-center justify-center bg-white/80 rounded-3xl p-4 cartoon-border shadow-pop transition-all">
-      <span class="text-xs font-bold uppercase text-slate-500 mb-1">Sisa Waktu Semua Player</span>
-      <div id="huntTimerText" class="text-6xl font-black text-gameBlue tracking-tighter">10</div>
-      <span class="text-xs font-bold text-red-500 mt-1 uppercase animate-pulse">Cari Benda Sekarang! 🏃‍♂️💨</span>
-    </div>
-
-    <!-- Active Players Status Badge list -->
-    <div class="w-full bg-white/90 rounded-2xl p-2.5 cartoon-border shadow-pop flex flex-col gap-1 flex-shrink-0">
-      <span class="text-[10px] font-bold text-slate-400 uppercase">Pemain Bertugas:</span>
-      <div id="playersListBadge" class="flex flex-wrap gap-1.5">
-        <!-- Badges generated dynamically -->
-      </div>
-    </div>
-
-  </main>
-
-  <!-- SCREEN 3: INDIVIDUAL SCANNER SCREEN (Player Scan Turn) -->
-  <main id="scanTurnScreen" class="w-full flex-1 flex-col justify-between items-center my-2 hidden overflow-hidden relative">
-    
-    <!-- Top Scanner Info Bar -->
-    <div class="w-full bg-white rounded-xl p-2 flex justify-between items-center cartoon-border shadow-pop flex-shrink-0 z-10">
       <div class="flex items-center gap-2">
-        <div id="scannerPlayerAvatar" class="w-7 h-7 bg-gameYellow rounded-full cartoon-border-sm flex items-center justify-center font-bold text-xs">P1</div>
-        <div>
-          <p id="scannerPlayerName" class="font-bold text-xs text-gameDarkBlue leading-tight">Player 1</p>
-          <p class="text-[10px] text-slate-500">Giliran Ambil Foto Benda</p>
+        <button id="soundToggleBtn" onclick="toggleSound()" class="hover:text-brand-yellow transition p-1">
+          <i id="soundIcon" class="fa-solid fa-volume-high text-sm"></i>
+        </button>
+        <span class="text-[10px] bg-brand-darkBlue px-2 py-0.5 rounded-full text-brand-yellow font-cartoon border border-blue-400">1 ROUND</span>
+      </div>
+    </div>
+
+    <!-- MAIN VIEWPORT -->
+    <div class="flex-1 relative overflow-hidden flex flex-col">
+
+      <!-- ================= 1. SETUP SCREEN ================= -->
+      <div id="setupScreen" class="absolute inset-0 p-4 sm:p-5 flex flex-col justify-between overflow-y-auto z-10">
+        <div class="text-center mt-1">
+          <div class="inline-block bg-brand-yellow p-3 sm:p-4 rounded-3xl border-4 border-brand-darkBlue shadow-pop-yellow mb-1.5 animate-bounce-gentle">
+            <i class="fa-solid fa-palette text-4xl sm:text-5xl text-brand-darkBlue"></i>
+          </div>
+          <h1 class="text-3xl font-bold text-brand-darkBlue tracking-wide">COLOR HUNT!</h1>
+          <p class="text-xs text-blue-700 font-bold mt-0.5">Cari benda dengan warna yang cocok bersama teman-temanmu!</p>
+        </div>
+
+        <div class="bg-white p-3.5 sm:p-4 rounded-3xl border-3 border-brand-blue shadow-md my-auto space-y-3">
+          
+          <!-- Player Count Input -->
+          <div>
+            <label class="block text-center text-xs font-extrabold text-brand-darkBlue mb-1.5 uppercase tracking-wide">
+              <i class="fa-solid fa-users text-brand-yellow mr-1 text-sm"></i> Jumlah Player
+            </label>
+            <div class="flex justify-center gap-2">
+              <button type="button" onclick="setPlayerCount(1)" id="pBtn-1" class="player-count-btn flex-1 py-1.5 rounded-2xl border-2 border-brand-blue font-bold text-brand-darkBlue bg-blue-50">1</button>
+              <button type="button" onclick="setPlayerCount(2)" id="pBtn-2" class="player-count-btn flex-1 py-1.5 rounded-2xl border-2 border-brand-blue font-bold text-brand-darkBlue bg-blue-50">2</button>
+              <button type="button" onclick="setPlayerCount(3)" id="pBtn-3" class="player-count-btn flex-1 py-1.5 rounded-2xl border-2 border-brand-blue font-bold text-white bg-brand-blue shadow-pop-btn">3</button>
+              <button type="button" onclick="setPlayerCount(4)" id="pBtn-4" class="player-count-btn flex-1 py-1.5 rounded-2xl border-2 border-brand-blue font-bold text-brand-darkBlue bg-blue-50">4</button>
+            </div>
+          </div>
+
+          <!-- Player Names Input -->
+          <div id="playerInputsContainer" class="space-y-1.5"></div>
+
+          <!-- Timer Selector -->
+          <div class="pt-1 border-t border-blue-100">
+            <label class="block text-center text-xs font-extrabold text-brand-darkBlue mb-1.5 uppercase tracking-wide">
+              <i class="fa-solid fa-clock text-brand-yellow mr-1 text-sm"></i> Durasi Nyari Benda
+            </label>
+            <div class="grid grid-cols-4 gap-1.5">
+              <button type="button" onclick="setSelectedTimer(10)" id="tBtn-10" class="timer-opt-btn py-1.5 rounded-xl border-2 border-brand-blue font-bold text-xs text-brand-darkBlue bg-blue-50">10s</button>
+              <button type="button" onclick="setSelectedTimer(15)" id="tBtn-15" class="timer-opt-btn py-1.5 rounded-xl border-2 border-brand-blue font-bold text-xs text-white bg-brand-blue shadow-pop-btn">15s</button>
+              <button type="button" onclick="setSelectedTimer(20)" id="tBtn-20" class="timer-opt-btn py-1.5 rounded-xl border-2 border-brand-blue font-bold text-xs text-brand-darkBlue bg-blue-50">20s</button>
+              <button type="button" onclick="setSelectedTimer(30)" id="tBtn-30" class="timer-opt-btn py-1.5 rounded-xl border-2 border-brand-blue font-bold text-xs text-brand-darkBlue bg-blue-50">30s</button>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="mt-1 mb-1">
+          <button onclick="triggerTargetAnnouncement()" class="btn-cartoon w-full bg-brand-yellow hover:bg-yellow-400 text-brand-darkBlue font-cartoon text-xl py-3 rounded-2xl border-3 border-brand-darkBlue shadow-pop-yellow-btn flex items-center justify-center gap-2">
+            <i class="fa-solid fa-play text-2xl"></i> MULAI GAME!
+          </button>
         </div>
       </div>
-      <div class="flex items-center gap-1">
-        <span class="text-[10px] font-bold text-slate-400">TARGET:</span>
-        <div id="scannerTargetPreview" class="w-5 h-5 rounded-full cartoon-border-sm"></div>
-      </div>
-    </div>
 
-    <!-- Camera Viewport Box -->
-    <div class="w-full flex-1 my-2 rounded-2xl cartoon-border bg-black relative overflow-hidden flex items-center justify-center shadow-pop">
-      <video id="webcamVideo" autoplay playsinline class="w-full h-full object-cover"></video>
-      <canvas id="snapshotCanvas" class="hidden"></canvas>
-      
-      <!-- Reticle Target -->
-      <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div class="w-24 h-24 border-4 border-dashed border-white/90 rounded-full animate-spin-slow flex items-center justify-center">
-          <div class="w-3 h-3 bg-red-500 rounded-full border-2 border-white"></div>
+      <!-- ================= 2. GLOBAL HUNTING TIMER SCREEN ================= -->
+      <div id="globalTimerScreen" class="absolute inset-0 flex flex-col justify-between p-5 hidden z-10 bg-brand-bgSoft transition-colors duration-200">
+        
+        <!-- Target Color Banner -->
+        <div class="bg-white p-4 rounded-3xl border-4 border-brand-darkBlue shadow-md text-center">
+          <span class="text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">TARGET WARNA KALIAN:</span>
+          <div class="flex items-center justify-center gap-3 bg-brand-cream py-2 px-4 rounded-2xl border-2 border-yellow-300">
+            <div id="globalTargetColorBox" class="w-10 h-10 rounded-full border-3 border-brand-darkBlue shadow" style="background-color: #10B981;"></div>
+            <span id="globalTargetColorName" class="font-cartoon text-xl text-brand-darkBlue">Hijau Zamrud</span>
+          </div>
+        </div>
+
+        <!-- Big Countdown Timer Display -->
+        <div class="my-auto text-center relative py-4">
+          <p class="text-xs font-extrabold text-blue-800 uppercase tracking-widest mb-2">SEMUA PLAYER CARI BENDA DENGAN WARNA DI ATAS!</p>
+          
+          <div id="timerCard" class="w-44 h-44 mx-auto bg-white rounded-full border-8 border-brand-darkBlue flex flex-col items-center justify-center shadow-pop relative overflow-hidden">
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">SISA WAKTU</span>
+            <span id="bigTimerDisplay" class="font-cartoon text-6xl text-brand-darkBlue leading-none my-1">15</span>
+            <span class="text-xs font-bold text-brand-blue">DETIK</span>
+          </div>
+        </div>
+
+        <!-- Status Footer -->
+        <div class="bg-blue-100 border-2 border-brand-blue p-3 rounded-2xl text-center">
+          <span class="text-xs font-bold text-brand-darkBlue">
+            <i class="fa-solid fa-person-running mr-1 text-brand-yellow"></i>
+            Waktu berjalan! Temukan benda dan bersiaplah scan secara bergantian!
+          </span>
         </div>
       </div>
-      
-      <!-- Camera Permission Warning Overlay -->
-      <div id="cameraErrorOverlay" class="absolute inset-0 bg-slate-900/90 flex flex-col items-center justify-center p-4 text-center hidden">
-        <span class="text-3xl mb-2">📷❌</span>
-        <p class="text-white font-bold text-xs mb-2">Kamera Tidak Aktif/Diizinkan</p>
-        <p class="text-slate-300 text-[10px] mb-3">Pilih warna benda kamu secara manual:</p>
-        <input type="color" id="fallbackColorPicker" value="#3b82f6" class="w-12 h-12 rounded-lg cursor-pointer border-2 border-white">
+
+      <!-- ================= 3. PLAYER SCAN / CAPTURE CAMERA SCREEN ================= -->
+      <div id="scanScreen" class="absolute inset-0 flex flex-col justify-between hidden z-10">
+        
+        <!-- Scan Header -->
+        <div class="bg-white px-4 py-2.5 border-b-4 border-brand-blue shadow-sm flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <div class="w-9 h-9 rounded-2xl bg-brand-yellow border-2 border-brand-darkBlue flex items-center justify-center font-cartoon text-brand-darkBlue text-base font-bold shadow-sm" id="scanPlayerAvatar">
+              P1
+            </div>
+            <div>
+              <span class="text-[9px] text-blue-500 font-bold uppercase tracking-wider block leading-none">Giliran Input</span>
+              <span id="scanPlayerName" class="font-cartoon text-brand-darkBlue text-sm leading-tight block">Player 1</span>
+            </div>
+          </div>
+
+          <!-- Target Mini Badge -->
+          <div class="flex items-center gap-2 bg-brand-cream border border-yellow-300 px-2.5 py-1 rounded-xl">
+            <div id="scanTargetBox" class="w-5 h-5 rounded-full border border-brand-darkBlue" style="background-color: #10B981;"></div>
+            <span id="scanTargetName" class="font-cartoon text-xs text-brand-darkBlue">Hijau Zamrud</span>
+          </div>
+        </div>
+
+        <!-- Live Camera Viewport -->
+        <div class="flex-1 bg-black relative overflow-hidden flex items-center justify-center">
+          <video id="webcamVideo" autoplay playsinline class="w-full h-full object-cover hidden"></video>
+
+          <!-- Color Simulation fallback -->
+          <div id="simulatedCameraView" class="w-full h-full relative flex flex-col items-center justify-center bg-slate-800 p-4">
+            <p class="text-center text-white/80 mb-3 text-xs font-semibold">
+              <i class="fa-solid fa-hand-pointer text-brand-yellow mr-1"></i> Ketuk area warna benda yang dipunyai <span id="simPlayerName">Player 1</span>:
+            </p>
+            <div class="grid grid-cols-3 gap-3 w-full max-w-[260px] my-auto">
+              <button onclick="selectSimulatedColor('#10B981')" class="h-16 rounded-2xl bg-emerald-500 border-2 border-white shadow-md active:scale-95 transition"></button>
+              <button onclick="selectSimulatedColor('#059669')" class="h-16 rounded-2xl bg-emerald-600 border-2 border-white shadow-md active:scale-95 transition"></button>
+              <button onclick="selectSimulatedColor('#34D399')" class="h-16 rounded-2xl bg-emerald-400 border-2 border-white shadow-md active:scale-95 transition"></button>
+              <button onclick="selectSimulatedColor('#FACC15')" class="h-16 rounded-2xl bg-yellow-400 border-2 border-white shadow-md active:scale-95 transition"></button>
+              <button onclick="selectSimulatedColor('#3B82F6')" class="h-16 rounded-2xl bg-blue-500 border-2 border-white shadow-md active:scale-95 transition"></button>
+              <button onclick="selectSimulatedColor('#EF4444')" class="h-16 rounded-2xl bg-red-500 border-2 border-white shadow-md active:scale-95 transition"></button>
+            </div>
+            <p class="text-[10px] text-white/50 text-center mt-1">Atau aktifkan kamera HP dengan tombol kanan atas</p>
+          </div>
+
+          <!-- Camera Reticle Overlay -->
+          <div class="absolute pointer-events-none flex flex-col items-center justify-center">
+            <div class="w-24 h-24 border-4 border-dashed border-brand-yellow rounded-full flex items-center justify-center bg-white/10 backdrop-blur-[1px]">
+              <div id="scannedColorDot" class="w-6 h-6 rounded-full border-2 border-white shadow-md" style="background-color: #10B981;"></div>
+            </div>
+          </div>
+
+          <button onclick="toggleCamera()" class="absolute top-3 right-3 bg-black/60 hover:bg-black/80 text-white p-2.5 rounded-full text-xs shadow border border-white/30">
+            <i class="fa-solid fa-camera-rotate"></i>
+          </button>
+        </div>
+
+        <!-- Capture Trigger Button -->
+        <div class="bg-white p-4 border-t-4 border-brand-blue flex items-center justify-center gap-3">
+          <button onclick="submitPlayerCapture()" class="btn-cartoon flex-1 bg-brand-yellow hover:bg-yellow-400 text-brand-darkBlue font-cartoon text-lg py-3 rounded-2xl border-3 border-brand-darkBlue shadow-pop-yellow-btn flex items-center justify-center gap-2">
+            <i class="fa-solid fa-camera text-xl"></i> AMBIL GAMBAR & SCAN!
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <canvas id="processCanvas" class="hidden"></canvas>
+
+    <!-- ================= MODALS & POPUPS ================= -->
+
+    <!-- POPUP 1: TARGET COLOR ANNOUNCEMENT -->
+    <div id="targetModal" class="absolute inset-0 modal-backdrop flex items-center justify-center p-5 z-30 hidden">
+      <div class="bg-white w-full rounded-3xl border-4 border-brand-darkBlue shadow-2xl p-5 text-center relative animate-bounce-gentle">
+        <span class="text-xs font-bold text-blue-600 uppercase tracking-widest block">SIAP-SIAP!</span>
+        <h2 class="text-2xl font-bold text-brand-darkBlue font-cartoon mt-0.5">TARGET WARNA RONDE INI</h2>
+        
+        <div class="my-5 bg-brand-cream border-3 border-yellow-300 p-4 rounded-3xl">
+          <div id="modalTargetCircle" class="w-20 h-20 rounded-full border-4 border-brand-darkBlue shadow-md mx-auto mb-2" style="background-color: #10B981;"></div>
+          <span id="modalTargetName" class="font-cartoon text-2xl text-brand-darkBlue block">Hijau Zamrud</span>
+        </div>
+
+        <p class="text-xs text-gray-500 font-bold mb-4">Semua player akan diberi waktu <span id="modalTimerText" class="text-red-500 font-extrabold">15 Detik</span> untuk mencari benda dengan warna ini!</p>
+
+        <button onclick="startGlobalHuntTimer()" class="btn-cartoon w-full bg-brand-yellow hover:bg-yellow-400 text-brand-darkBlue font-cartoon text-lg py-3.5 rounded-2xl border-3 border-brand-darkBlue shadow-pop-yellow-btn">
+          MULAI CARI SEKARANG! <i class="fa-solid fa-bolt ml-1"></i>
+        </button>
       </div>
     </div>
 
-    <!-- Scan Action Button -->
-    <button onclick="capturePlayerObject()" class="w-full bg-gameYellow hover:bg-yellow-300 text-gameDarkBlue font-black text-base py-2.5 rounded-2xl cartoon-border shadow-pop active:scale-98 transition-transform uppercase flex items-center justify-center gap-2 flex-shrink-0">
-      📸 AMBIL FOTO BENDA!
-    </button>
-  </main>
+    <!-- POPUP 2: TURN HANDOVER POPUP -->
+    <div id="handoverModal" class="absolute inset-0 modal-backdrop flex items-center justify-center p-5 z-30 hidden">
+      <div class="bg-white w-full rounded-3xl border-4 border-brand-darkBlue shadow-2xl p-5 text-center relative">
+        <div class="w-16 h-16 bg-brand-yellow rounded-3xl border-3 border-brand-darkBlue mx-auto flex items-center justify-center text-2xl font-cartoon text-brand-darkBlue shadow-md mb-2" id="handoverAvatar">
+          P1
+        </div>
+        <span class="text-xs font-bold text-red-500 uppercase tracking-widest block">WAKTU HABIS!</span>
+        <h2 class="text-2xl font-bold text-brand-darkBlue font-cartoon mt-0.5" id="handoverTitle">Serahkan ke Player 1</h2>
+        <p class="text-xs text-gray-600 font-bold my-3">Arahkan kamera atau pilih warna benda yang berhasil kamu dapatkan!</p>
 
-  <!-- POPUP MODAL: ANNOUNCEMENT POPUP (Round Target Color) -->
-  <div id="targetAnnouncementModal" class="fixed inset-0 modal-backdrop flex items-center justify-center p-4 z-50 hidden">
-    <div class="bg-white w-full max-w-xs rounded-3xl p-4 cartoon-border shadow-pop-lg text-center flex flex-col items-center animate-pop-in">
-      <span class="bg-blue-100 text-gameBlue font-bold text-xs px-3 py-1 rounded-full border border-blue-300 uppercase mb-2">TARGET WARNA RONDE</span>
-      
-      <div id="announceColorCircle" class="w-20 h-20 rounded-full cartoon-border my-2 shadow-inner flex items-center justify-center"></div>
-      
-      <h3 id="announceColorName" class="text-2xl font-black text-gameDarkBlue mb-1">KUNING CERAH</h3>
-      <p class="text-xs text-slate-600 mb-4 px-2">Semua player siap-siap! Nyari benda warna ini bareng-bareng ya.</p>
-      
-      <button onclick="startHuntingPhase()" class="w-full bg-gameYellow hover:bg-yellow-300 text-gameDarkBlue font-black text-base py-2.5 rounded-2xl cartoon-border shadow-pop active:scale-95 transition-transform uppercase">
-        🚀 SIAP, MULAI NYARI!
-      </button>
+        <button onclick="startScanPhase()" class="btn-cartoon w-full bg-brand-blue hover:bg-brand-darkBlue text-white font-cartoon text-lg py-3 rounded-2xl border-3 border-brand-darkBlue shadow-pop-btn">
+          SAYA SIAP SCAN! <i class="fa-solid fa-camera ml-1"></i>
+        </button>
+      </div>
     </div>
+
+    <!-- POPUP 3: FINAL REVEAL & LEADERBOARD MODAL -->
+    <div id="leaderboardModal" class="absolute inset-0 modal-backdrop flex items-center justify-center p-4 z-40 hidden">
+      <div class="bg-white w-full rounded-3xl border-4 border-brand-darkBlue shadow-2xl p-4 text-center relative max-h-[92%] overflow-y-auto">
+        
+        <div class="inline-block bg-brand-yellow p-2.5 rounded-2xl border-3 border-brand-darkBlue shadow-sm mb-1">
+          <i class="fa-solid fa-trophy text-3xl text-brand-darkBlue"></i>
+        </div>
+
+        <h2 class="text-2xl font-bold text-brand-darkBlue font-cartoon">HASIL & RANKING!</h2>
+        <p class="text-[11px] text-gray-500 font-bold mb-3">Analisis akurasi kemiripan warna benda tiap player</p>
+
+        <!-- Players Captured Cards Preview -->
+        <div id="leaderboardCards" class="space-y-2.5 mb-4">
+          <!-- Dynamically populated -->
+        </div>
+
+        <button onclick="resetGame()" class="btn-cartoon w-full bg-brand-yellow hover:bg-yellow-400 text-brand-darkBlue font-cartoon text-lg py-3 rounded-2xl border-3 border-brand-darkBlue shadow-pop-yellow-btn">
+          <i class="fa-solid fa-rotate-right mr-1"></i> MAIN LAGI!
+        </button>
+      </div>
+    </div>
+
   </div>
 
-  <!-- POPUP MODAL: LEADERBOARD & WINNER RESULT -->
-  <div id="leaderboardModal" class="fixed inset-0 modal-backdrop flex items-center justify-center p-3 z-50 hidden">
-    <div class="bg-white w-full max-w-sm rounded-3xl p-4 cartoon-border shadow-pop-lg text-center flex flex-col max-h-[92dvh] my-auto overflow-hidden animate-pop-in">
-      
-      <div class="flex-shrink-0 mb-2">
-        <span class="text-3xl">🏆</span>
-        <h2 class="text-xl font-black text-gameDarkBlue tracking-wide">HASIL PERTANDINGAN</h2>
-        <p class="text-[11px] text-slate-500 font-medium">Pratinjau foto & skor akurasi warna</p>
-      </div>
-
-      <!-- Leaderboard Cards Container -->
-      <div id="leaderboardCardsContainer" class="flex-1 overflow-y-auto my-2 pr-1 flex flex-col gap-2">
-        <!-- Rendered via JS -->
-      </div>
-
-      <button onclick="resetGameToHome()" class="w-full bg-gameYellow hover:bg-yellow-300 text-gameDarkBlue font-black text-base py-2.5 rounded-2xl cartoon-border shadow-pop active:scale-95 transition-transform uppercase flex-shrink-0 mt-1">
-        🔄 MAIN LAGI!
-      </button>
-    </div>
-  </div>
-
-  <!-- JAVASCRIPT LOGIC -->
   <script>
-    // Audio Context & Web Audio API Sound Generator
-    let audioCtx = null;
-    let isSoundEnabled = true;
+    /* ================= GAME DATA ================= */
+    const PRESET_COLORS = [
+      { name: 'Hijau Zamrud', hex: '#10B981', lab: [70.5, -45.2, 14.8] },
+      { name: 'Kuning Cerah', hex: '#FACC15', lab: [84.2, -7.5, 83.2] },
+      { name: 'Biru Elektrik', hex: '#3B82F6', lab: [58.3, 14.2, -61.2] },
+      { name: 'Merah Cabai', hex: '#EF4444', lab: [53.2, 67.8, 38.2] },
+      { name: 'Pink Cerah', hex: '#EC4899', lab: [56.1, 68.9, -12.4] },
+      { name: 'Ungu Cerah', hex: '#8B5CF6', lab: [48.2, 45.3, -63.8] },
+      { name: 'Cyan Neon', hex: '#06B6D4', lab: [68.4, -32.1, -22.4] },
+      { name: 'Orange Hangat', hex: '#F97316', lab: [63.2, 46.1, 62.4] }
+    ];
 
-    function initAudio() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-    }
+    let players = [];
+    let selectedPlayerCount = 3;
+    let selectedTimerDuration = 15; // Default timer 15 seconds
+    let currentPlayerIndex = 0;
+    let targetColor = null;
+    let currentScannedColorHex = '#10B981';
+
+    let timerInterval = null;
+    let globalTimeLeft = 15;
+    let soundEnabled = true;
+    let isWebcamActive = false;
+    let videoStream = null;
+
+    /* ================= WEB AUDIO API EFFECTS ================= */
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
     function playSound(type) {
-      if (!isSoundEnabled) return;
-      initAudio();
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
+      if (!soundEnabled) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
 
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-
-      const now = audioCtx.currentTime;
-
-      if (type === 'pop') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(300, now);
-        osc.frequency.exponentialRampToValueAtTime(800, now + 0.1);
-        gain.gain.setValueAtTime(0.3, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-        osc.start(now);
-        osc.stop(now + 0.1);
-      } else if (type === 'tick') {
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(600, now);
-        gain.gain.setValueAtTime(0.15, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
-        osc.start(now);
-        osc.stop(now + 0.05);
-      } else if (type === 'urgent-tick') {
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(900, now);
-        gain.gain.setValueAtTime(0.25, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
-        osc.start(now);
-        osc.stop(now + 0.08);
-      } else if (type === 'alarm') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(400, now);
-        osc.frequency.linearRampToValueAtTime(800, now + 0.2);
-        gain.gain.setValueAtTime(0.3, now);
-        gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
-        osc.start(now);
-        osc.stop(now + 0.2);
-      } else if (type === 'fanfare') {
-        const freqs = [523.25, 659.25, 783.99, 1046.50];
-        freqs.forEach((f, i) => {
-          const subOsc = audioCtx.createOscillator();
-          const subGain = audioCtx.createGain();
-          subOsc.connect(subGain);
-          subGain.connect(audioCtx.destination);
-          subOsc.type = 'triangle';
-          subOsc.frequency.setValueAtTime(f, now + (i * 0.1));
-          subGain.gain.setValueAtTime(0.2, now + (i * 0.1));
-          subGain.gain.exponentialRampToValueAtTime(0.01, now + (i * 0.1) + 0.3);
-          subOsc.start(now + (i * 0.1));
-          subOsc.stop(now + (i * 0.1) + 0.3);
-        });
+        if (type === 'click') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(450, audioCtx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(850, audioCtx.currentTime + 0.08);
+          gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+          gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.08);
+        } else if (type === 'tick') {
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+          gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+          gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.05);
+        } else if (type === 'urgent') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(900, audioCtx.currentTime);
+          osc.frequency.linearRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
+          gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+          gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.12);
+        } else if (type === 'shutter') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.15);
+          gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+          gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.15);
+        } else if (type === 'victory') {
+          const notes = [523.25, 659.25, 783.99, 1046.50];
+          notes.forEach((freq, idx) => {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.connect(g);
+            g.connect(audioCtx.destination);
+            o.type = 'triangle';
+            o.frequency.setValueAtTime(freq, audioCtx.currentTime + (idx * 0.12));
+            g.gain.setValueAtTime(0.25, audioCtx.currentTime + (idx * 0.12));
+            g.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + (idx * 0.12) + 0.3);
+            o.start(audioCtx.currentTime + (idx * 0.12));
+            o.stop(audioCtx.currentTime + (idx * 0.12) + 0.3);
+          });
+        }
+      } catch (e) {
+        console.log('Audio error:', e);
       }
     }
 
     function toggleSound() {
-      isSoundEnabled = !isSoundEnabled;
-      document.getElementById('soundToggleBtn').innerText = isSoundEnabled ? '🔊' : '🔇';
+      soundEnabled = !soundEnabled;
+      document.getElementById('soundIcon').className = soundEnabled 
+        ? 'fa-solid fa-volume-high text-sm' 
+        : 'fa-solid fa-volume-xmark text-sm text-red-300';
     }
 
-    // GAME STATE & CONFIGURATION
-    const PRESET_COLORS = [
-      { name: "Kuning Cerah", hex: "#FACC15", rgb: [250, 204, 21] },
-      { name: "Hijau Zamrud", hex: "#10B981", rgb: [16, 185, 129] },
-      { name: "Merah Cabai", hex: "#EF4444", rgb: [239, 68, 68] },
-      { name: "Biru Samudra", hex: "#3B82F6", rgb: [59, 130, 246] },
-      { name: "Ungu Terong", hex: "#8B5CF6", rgb: [139, 92, 246] },
-      { name: "Oranye Jeruk", hex: "#F97316", rgb: [249, 115, 22] },
-      { name: "Pink Merah Muda", hex: "#EC4899", rgb: [236, 72, 153] }
-    ];
-
-    let playerCount = 2;
-    let timerDuration = 10;
-    let playerNames = ["Player 1", "Player 2"];
-    let targetColor = null;
-    let currentScanningIndex = 0;
-    let huntTimer = null;
-    let remainingHuntTime = 10;
-    let playerResults = []; // Stores { name, snapshotUrl, scannedHex, score }
-    let videoStream = null;
-
-    // INITIALIZATION
-    window.onload = () => {
-      setPlayerCount(2);
-      setTimerDuration(10);
+    /* ================= GAME INITIALIZATION ================= */
+    window.onload = function() {
+      setPlayerCount(3);
+      setSelectedTimer(15);
     };
 
     function setPlayerCount(count) {
-      playSound('pop');
-      playerCount = count;
-      
-      document.querySelectorAll('.pc-btn').forEach((btn, idx) => {
+      playSound('click');
+      selectedPlayerCount = count;
+
+      document.querySelectorAll('.player-count-btn').forEach((btn, idx) => {
         if (idx + 1 === count) {
-          btn.className = "pc-btn py-1.5 rounded-xl border-2 border-gameDarkBlue bg-gameBlue text-white font-bold text-sm shadow-pop-sm";
+          btn.className = 'player-count-btn flex-1 py-1.5 rounded-2xl border-2 border-brand-blue font-bold text-white bg-brand-blue shadow-pop-btn';
         } else {
-          btn.className = "pc-btn py-1.5 rounded-xl border-2 border-slate-300 bg-white font-bold text-sm hover:border-gameBlue active:scale-95 text-slate-700";
+          btn.className = 'player-count-btn flex-1 py-1.5 rounded-2xl border-2 border-brand-blue font-bold text-brand-darkBlue bg-blue-50';
         }
       });
 
       const container = document.getElementById('playerInputsContainer');
       container.innerHTML = '';
-      playerNames = [];
-
       for (let i = 1; i <= count; i++) {
-        const defaultName = `Player ${i}`;
-        playerNames.push(defaultName);
-        
-        const inputWrapper = document.createElement('div');
-        inputWrapper.className = 'flex items-center gap-2';
-        inputWrapper.innerHTML = `
-          <span class="w-6 h-6 rounded-full bg-gameYellow text-gameDarkBlue font-bold text-xs flex items-center justify-center border border-gameDarkBlue flex-shrink-0">P${i}</span>
-          <input type="text" value="${defaultName}" onchange="updatePlayerName(${i-1}, this.value)" class="flex-1 px-3 py-1.5 rounded-xl border-2 border-slate-300 font-semibold text-xs focus:border-gameBlue focus:outline-none">
+        container.innerHTML += `
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-brand-yellow text-brand-darkBlue font-cartoon text-xs flex items-center justify-center font-bold border border-brand-darkBlue">P${i}</span>
+            <input type="text" id="playerNameInput-${i}" value="Player ${i}" placeholder="Nama Player ${i}" 
+                   class="flex-1 bg-blue-50 border-2 border-brand-blue rounded-xl px-3 py-0.5 text-sm font-bold text-brand-darkBlue focus:outline-none focus:bg-white">
+          </div>
         `;
-        container.appendChild(inputWrapper);
       }
     }
 
-    function updatePlayerName(index, val) {
-      playerNames[index] = val.trim() || `Player ${index + 1}`;
-    }
+    function setSelectedTimer(seconds) {
+      playSound('click');
+      selectedTimerDuration = seconds;
 
-    function setTimerDuration(seconds) {
-      playSound('pop');
-      timerDuration = seconds;
-      
-      const durations = [10, 15, 20, 30];
-      document.querySelectorAll('.timer-btn').forEach((btn, idx) => {
-        if (durations[idx] === seconds) {
-          btn.className = "timer-btn py-1 rounded-xl border-2 border-gameDarkBlue bg-gameBlue text-white font-bold text-xs shadow-pop-sm";
-        } else {
-          btn.className = "timer-btn py-1 rounded-xl border-2 border-slate-300 bg-white font-bold text-xs hover:border-gameBlue active:scale-95 text-slate-700";
+      [10, 15, 20, 30].forEach(sec => {
+        const btn = document.getElementById(`tBtn-${sec}`);
+        if (btn) {
+          if (sec === seconds) {
+            btn.className = 'timer-opt-btn py-1.5 rounded-xl border-2 border-brand-blue font-bold text-xs text-white bg-brand-blue shadow-pop-btn';
+          } else {
+            btn.className = 'timer-opt-btn py-1.5 rounded-xl border-2 border-brand-blue font-bold text-xs text-brand-darkBlue bg-blue-50';
+          }
         }
       });
     }
 
-    function startGame() {
-      playSound('pop');
-      targetColor = PRESET_COLORS[Math.floor(Math.random() * PRESET_COLORS.length)];
-      
-      document.getElementById('announceColorCircle').style.backgroundColor = targetColor.hex;
-      document.getElementById('announceColorName').innerText = targetColor.name.toUpperCase();
-      
-      document.getElementById('targetAnnouncementModal').classList.remove('hidden');
-    }
-
-    function startHuntingPhase() {
-      playSound('pop');
-      document.getElementById('targetAnnouncementModal').classList.add('hidden');
-      document.getElementById('setupScreen').classList.add('hidden');
-      document.getElementById('huntScreen').classList.remove('hidden');
-      document.getElementById('huntScreen').classList.add('flex');
-
-      document.getElementById('targetColorCircle').style.backgroundColor = targetColor.hex;
-      document.getElementById('targetColorName').innerText = targetColor.name.toUpperCase();
-
-      const badgeContainer = document.getElementById('playersListBadge');
-      badgeContainer.innerHTML = '';
-      playerNames.forEach((name, i) => {
-        const badge = document.createElement('span');
-        badge.className = 'bg-blue-100 text-gameDarkBlue text-[11px] font-bold px-2 py-0.5 rounded-full border border-blue-300';
-        badge.innerText = `P${i+1}: ${name}`;
-        badgeContainer.appendChild(badge);
-      });
-
-      remainingHuntTime = timerDuration;
-      const timerText = document.getElementById('huntTimerText');
-      const timerContainer = document.getElementById('timerContainer');
-      timerText.innerText = remainingHuntTime;
-      timerContainer.classList.remove('pulse-alarm');
-
-      huntTimer = setInterval(() => {
-        remainingHuntTime--;
-        timerText.innerText = remainingHuntTime;
-
-        if (remainingHuntTime <= 3 && remainingHuntTime > 0) {
-          playSound('urgent-tick');
-          timerContainer.classList.add('pulse-alarm');
-        } else if (remainingHuntTime > 0) {
-          playSound('tick');
-        }
-
-        if (remainingHuntTime <= 0) {
-          clearInterval(huntTimer);
-          playSound('alarm');
-          setTimeout(startScanningTurnPhase, 1000);
-        }
-      }, 1000);
-    }
-
-    // INDIVIDUAL SCANNER TURN PHASE
-    function startScanningTurnPhase() {
-      document.getElementById('huntScreen').classList.add('hidden');
-      document.getElementById('huntScreen').classList.remove('flex');
-      
-      document.getElementById('scanTurnScreen').classList.remove('hidden');
-      document.getElementById('scanTurnScreen').classList.add('flex');
-
-      currentScanningIndex = 0;
-      playerResults = [];
-      
-      setupCamera();
-      updateScannerTurnUI();
-    }
-
-    function updateScannerTurnUI() {
-      const name = playerNames[currentScanningIndex];
-      document.getElementById('scannerPlayerAvatar').innerText = `P${currentScanningIndex + 1}`;
-      document.getElementById('scannerPlayerName').innerText = name;
-      document.getElementById('scannerTargetPreview').style.backgroundColor = targetColor.hex;
-    }
-
-    async function setupCamera() {
-      const video = document.getElementById('webcamVideo');
-      const cameraOverlay = document.getElementById('cameraErrorOverlay');
-      
-      try {
-        videoStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 640 } }
+    function triggerTargetAnnouncement() {
+      playSound('click');
+      players = [];
+      for (let i = 1; i <= selectedPlayerCount; i++) {
+        const inputVal = document.getElementById(`playerNameInput-${i}`).value.trim();
+        players.push({
+          id: i,
+          name: inputVal || `Player ${i}`,
+          scannedHex: '#FFFFFF',
+          photoDataUrl: null,
+          similarity: 0,
+          score: 0
         });
-        video.srcObject = videoStream;
-        cameraOverlay.classList.add('hidden');
-      } catch (err) {
-        console.warn("Kamera tidak dapat diakses:", err);
-        cameraOverlay.classList.remove('hidden');
+      }
+
+      // Pick Target Color
+      targetColor = PRESET_COLORS[Math.floor(Math.random() * PRESET_COLORS.length)];
+
+      document.getElementById('modalTargetName').innerText = targetColor.name;
+      document.getElementById('modalTargetCircle').style.backgroundColor = targetColor.hex;
+      document.getElementById('modalTimerText').innerText = `${selectedTimerDuration} Detik`;
+
+      document.getElementById('setupScreen').classList.add('hidden');
+      document.getElementById('targetModal').classList.remove('hidden');
+    }
+
+    /* ================= GLOBAL HUNTING TIMER ================= */
+    function startGlobalHuntTimer() {
+      playSound('click');
+      document.getElementById('targetModal').classList.add('hidden');
+      document.getElementById('globalTimerScreen').classList.remove('hidden');
+
+      document.getElementById('globalTargetColorName').innerText = targetColor.name;
+      document.getElementById('globalTargetColorBox').style.backgroundColor = targetColor.hex;
+
+      globalTimeLeft = selectedTimerDuration;
+      document.getElementById('bigTimerDisplay').innerText = globalTimeLeft;
+
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(updateGlobalTimer, 1000);
+    }
+
+    function updateGlobalTimer() {
+      globalTimeLeft--;
+      const timerDisplay = document.getElementById('bigTimerDisplay');
+      const globalScreen = document.getElementById('globalTimerScreen');
+      const timerCard = document.getElementById('timerCard');
+
+      timerDisplay.innerText = globalTimeLeft;
+
+      if (globalTimeLeft <= 4 && globalTimeLeft > 0) {
+        playSound('urgent');
+        globalScreen.classList.add('animate-alarm');
+        timerCard.classList.add('animate-shake');
+        timerDisplay.classList.add('text-red-600');
+      } else {
+        playSound('tick');
+      }
+
+      if (globalTimeLeft <= 0) {
+        clearInterval(timerInterval);
+        globalScreen.classList.remove('animate-alarm');
+        timerCard.classList.remove('animate-shake');
+        timerDisplay.classList.remove('text-red-600');
+        
+        // Time's up -> Show Handover popup for Player 1
+        currentPlayerIndex = 0;
+        showHandoverModal();
       }
     }
 
-    function capturePlayerObject() {
-      playSound('pop');
-      const video = document.getElementById('webcamVideo');
-      const canvas = document.getElementById('snapshotCanvas');
-      const ctx = canvas.getContext('2d');
+    /* ================= SEQUENTIAL SCAN PHASE ================= */
+    function showHandoverModal() {
+      const p = players[currentPlayerIndex];
+      document.getElementById('handoverAvatar').innerText = `P${p.id}`;
+      document.getElementById('handoverTitle').innerText = `Serahkan ke ${p.name}`;
 
-      let sampledRGB = [0, 0, 0];
-      let snapshotUrl = '';
+      document.getElementById('globalTimerScreen').classList.add('hidden');
+      document.getElementById('scanScreen').classList.add('hidden');
+      document.getElementById('handoverModal').classList.remove('hidden');
+    }
 
-      if (videoStream && video.readyState === video.HAVE_ENOUGH_DATA) {
+    function startScanPhase() {
+      playSound('click');
+      document.getElementById('handoverModal').classList.add('hidden');
+      document.getElementById('scanScreen').classList.remove('hidden');
+
+      const p = players[currentPlayerIndex];
+      document.getElementById('scanPlayerName').innerText = p.name;
+      document.getElementById('scanPlayerAvatar').innerText = `P${p.id}`;
+      document.getElementById('simPlayerName').innerText = p.name;
+      document.getElementById('scanTargetName').innerText = targetColor.name;
+      document.getElementById('scanTargetBox').style.backgroundColor = targetColor.hex;
+
+      // Default scan dot
+      currentScannedColorHex = targetColor.hex;
+      document.getElementById('scannedColorDot').style.backgroundColor = currentScannedColorHex;
+    }
+
+    function selectSimulatedColor(hex) {
+      playSound('click');
+      currentScannedColorHex = hex;
+      document.getElementById('scannedColorDot').style.backgroundColor = hex;
+    }
+
+    async function toggleCamera() {
+      playSound('click');
+      const videoEl = document.getElementById('webcamVideo');
+      const simView = document.getElementById('simulatedCameraView');
+
+      if (!isWebcamActive) {
+        try {
+          videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+          videoEl.srcObject = videoStream;
+          videoEl.classList.remove('hidden');
+          simView.classList.add('hidden');
+          isWebcamActive = true;
+        } catch (err) {
+          alert('Kamera tidak dapat diakses, menggunakan mode simulasi warna.');
+        }
+      } else {
+        if (videoStream) videoStream.getTracks().forEach(track => track.stop());
+        videoEl.classList.add('hidden');
+        simView.classList.remove('hidden');
+        isWebcamActive = false;
+      }
+    }
+
+    function submitPlayerCapture() {
+      playSound('shutter');
+      const p = players[currentPlayerIndex];
+
+      let snapshotUrl = null;
+
+      if (isWebcamActive) {
+        const video = document.getElementById('webcamVideo');
+        const canvas = document.getElementById('processCanvas');
+        const ctx = canvas.getContext('2d');
         canvas.width = video.videoWidth || 300;
         canvas.height = video.videoHeight || 300;
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        // Sample center pixels
-        const centerX = Math.floor(canvas.width / 2);
-        const centerY = Math.floor(canvas.height / 2);
-        const pixelData = ctx.getImageData(centerX - 5, centerY - 5, 10, 10).data;
-
-        let r = 0, g = 0, b = 0, count = 0;
-        for (let i = 0; i < pixelData.length; i += 4) {
-          r += pixelData[i];
-          g += pixelData[i + 1];
-          b += pixelData[i + 2];
-          count++;
-        }
-        sampledRGB = [Math.round(r / count), Math.round(g / count), Math.round(b / count)];
-        snapshotUrl = canvas.toDataURL('image/jpeg', 0.8);
+        // Get Center Pixel Color
+        const pixel = ctx.getImageData(Math.floor(canvas.width / 2), Math.floor(canvas.height / 2), 1, 1).data;
+        currentScannedColorHex = rgbToHex(pixel[0], pixel[1], pixel[2]);
+        snapshotUrl = canvas.toDataURL('image/jpeg', 0.7);
       } else {
-        // Fallback color picker
-        const hex = document.getElementById('fallbackColorPicker').value;
-        sampledRGB = hexToRgb(hex);
-        snapshotUrl = createColorSampleImageDataUrl(hex);
+        // Generate Color Snapshot Placeholder
+        snapshotUrl = createColoredPlaceholder(currentScannedColorHex, p.name);
       }
 
-      // CIELAB Precision Color Distance Calculation
-      const score = calculateCIELABSimilarity(targetColor.rgb, sampledRGB);
+      // Calculate Strict CIELAB / Strict Euclidean Accuracy
+      const targetRgb = hexToRgb(targetColor.hex);
+      const scannedRgb = hexToRgb(currentScannedColorHex);
+      const similarity = calculateStrictSimilarity(scannedRgb, targetRgb);
 
-      playerResults.push({
-        name: playerNames[currentScanningIndex],
-        playerNum: currentScanningIndex + 1,
-        snapshotUrl: snapshotUrl,
-        scannedRgb: sampledRGB,
-        scannedHex: rgbToHex(sampledRGB[0], sampledRGB[1], sampledRGB[2]),
-        score: score
+      p.scannedHex = currentScannedColorHex;
+      p.photoDataUrl = snapshotUrl;
+      p.similarity = similarity;
+      p.score = Math.round(similarity * 10);
+
+      // Move to next player or Leaderboard
+      currentPlayerIndex++;
+      if (currentPlayerIndex < players.length) {
+        showHandoverModal();
+      } else {
+        showLeaderboard();
+      }
+    }
+
+    /* ================= STRICT ACCURACY ALGORITHM ================= */
+    function calculateStrictSimilarity(rgb1, rgb2) {
+      const rDiff = rgb1[0] - rgb2[0];
+      const gDiff = rgb1[1] - rgb2[1];
+      const bDiff = rgb1[2] - rgb2[2];
+
+      const euclidDistance = Math.sqrt(rDiff * rDiff + gDiff * gDiff + bDiff * bDiff);
+      const maxDistance = 441.67; // Math.sqrt(255^2 * 3)
+
+      let rawPercent = (1 - (euclidDistance / maxDistance)) * 100;
+      
+      // Strict exponential penalty for non-exact shades
+      let strictScore = Math.pow(rawPercent / 100, 2.2) * 100;
+      return Math.max(0, Math.min(100, Math.round(strictScore)));
+    }
+
+    /* ================= FINAL LEADERBOARD & REVEAL ================= */
+    function showLeaderboard() {
+      if (videoStream) {
+        videoStream.getTracks().forEach(t => t.stop());
+        isWebcamActive = false;
+      }
+
+      document.getElementById('scanScreen').classList.add('hidden');
+      document.getElementById('leaderboardModal').classList.remove('hidden');
+
+      playSound('victory');
+
+      // Sort by score/similarity
+      const sorted = [...players].sort((a, b) => b.score - a.score);
+      const cardsContainer = document.getElementById('leaderboardCards');
+      cardsContainer.innerHTML = '';
+
+      const medals = ['🥇 Pemenang!', '🥈 Juara 2', '🥉 Juara 3', '🎗️ Juara 4'];
+
+      sorted.forEach((p, idx) => {
+        cardsContainer.innerHTML += `
+          <div class="bg-blue-50 border-3 border-brand-blue p-3 rounded-2xl flex items-center justify-between gap-2 shadow-sm">
+            <div class="flex items-center gap-2.5">
+              <img src="${p.photoDataUrl}" class="w-12 h-12 rounded-xl border-2 border-brand-darkBlue object-cover shadow-sm">
+              <div class="text-left">
+                <span class="text-[10px] font-extrabold text-blue-600 block leading-tight">${medals[idx]}</span>
+                <span class="font-cartoon text-brand-darkBlue text-base leading-tight block">${p.name}</span>
+                
+                <div class="flex items-center gap-1.5 mt-1">
+                  <span class="text-[9px] font-bold text-gray-500">Hasil:</span>
+                  <div class="w-3.5 h-3.5 rounded-full border border-black" style="background-color: ${p.scannedHex};"></div>
+                  <span class="text-[10px] font-bold text-brand-darkBlue">${p.similarity}% Akurat</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="text-right">
+              <span class="font-cartoon text-lg text-brand-darkBlue bg-brand-yellow px-2.5 py-1 rounded-xl border border-brand-darkBlue inline-block shadow-sm">
+                ${p.score} Pts
+              </span>
+            </div>
+          </div>
+        `;
       });
 
-      currentScanningIndex++;
-
-      if (currentScanningIndex < playerCount) {
-        updateScannerTurnUI();
-      } else {
-        // Stop Camera
-        if (videoStream) {
-          videoStream.getTracks().forEach(track => track.stop());
-        }
-        showFinalLeaderboard();
+      if (typeof confetti === 'function') {
+        confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
       }
     }
 
-    // CIELAB COLOR ACCURACY ALGORITHM
-    function calculateCIELABSimilarity(rgb1, rgb2) {
-      const lab1 = rgbToLab(rgb1[0], rgb1[1], rgb1[2]);
-      const lab2 = rgbToLab(rgb2[0], rgb2[1], rgb2[2]);
-
-      const deltaE = Math.sqrt(
-        Math.pow(lab1[0] - lab2[0], 2) +
-        Math.pow(lab1[1] - lab2[1], 2) +
-        Math.pow(lab1[2] - lab2[2], 2)
-      );
-
-      // Strict mapping: DeltaE 0 = 100%, DeltaE >= 60 = 0%
-      let similarity = Math.max(0, 100 - (deltaE * 1.65));
-      return Math.round(similarity);
+    function resetGame() {
+      playSound('click');
+      document.getElementById('leaderboardModal').classList.add('hidden');
+      document.getElementById('setupScreen').classList.remove('hidden');
     }
 
-    function rgbToLab(r, g, b) {
-      let rN = r / 255, gN = g / 255, bN = b / 255;
-      rN = rN > 0.04045 ? Math.pow((rN + 0.055) / 1.055, 2.4) : rN / 12.92;
-      gN = gN > 0.04045 ? Math.pow((gN + 0.055) / 1.055, 2.4) : gN / 12.92;
-      bN = bN > 0.04045 ? Math.pow((bN + 0.055) / 1.055, 2.4) : bN / 12.92;
-
-      let x = (rN * 0.4124 + gN * 0.3576 + bN * 0.1805) / 0.95047;
-      let y = (rN * 0.2126 + gN * 0.7152 + bN * 0.0722) / 1.00000;
-      let z = (rN * 0.0193 + gN * 0.1192 + bN * 0.9505) / 1.08883;
-
-      x = x > 0.008856 ? Math.pow(x, 1/3) : (7.787 * x) + (16/116);
-      y = y > 0.008856 ? Math.pow(y, 1/3) : (7.787 * y) + (16/116);
-      z = z > 0.008856 ? Math.pow(z, 1/3) : (7.787 * z) + (16/116);
-
-      return [(116 * y) - 16, 500 * (x - y), 200 * (y - z)];
-    }
-
+    /* Helper Utilities */
     function hexToRgb(hex) {
-      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-      return result ? [
-        parseInt(result[1], 16),
-        parseInt(result[2], 16),
-        parseInt(result[3], 16)
-      ] : [0, 0, 0];
+      let c = hex.replace('#', '');
+      if (c.length === 3) c = c.split('').map(x => x + x).join('');
+      const num = parseInt(c, 16);
+      return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
     }
 
     function rgbToHex(r, g, b) {
       return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
     }
 
-    function createColorSampleImageDataUrl(hex) {
-      const canvas = document.createElement('canvas');
-      canvas.width = 100;
-      canvas.height = 100;
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = hex;
-      ctx.fillRect(0, 0, 100, 100);
-      return canvas.toDataURL();
-    }
-
-    // FINAL LEADERBOARD MODAL
-    function showFinalLeaderboard() {
-      document.getElementById('scanTurnScreen').classList.add('hidden');
-      document.getElementById('scanTurnScreen').classList.remove('flex');
-      
-      const leaderboardModal = document.getElementById('leaderboardModal');
-      leaderboardModal.classList.remove('hidden');
-
-      // Sort by score descending
-      playerResults.sort((a, b) => b.score - a.score);
-
-      const container = document.getElementById('leaderboardCardsContainer');
-      container.innerHTML = '';
-
-      const medals = ['🥇', '🥈', '🥉', '🎗️'];
-
-      playerResults.forEach((res, index) => {
-        const medal = medals[index] || '🎗️';
-        const card = document.createElement('div');
-        card.className = `p-2.5 rounded-2xl cartoon-border flex items-center justify-between ${index === 0 ? 'bg-yellow-50 border-gameYellow' : 'bg-white'}`;
-
-        card.innerHTML = `
-          <div class="flex items-center gap-2.5">
-            <span class="text-2xl">${medal}</span>
-            <img src="${res.snapshotUrl}" class="w-12 h-12 rounded-xl object-cover cartoon-border-sm flex-shrink-0" alt="Snapshot">
-            <div class="text-left">
-              <p class="font-bold text-xs text-gameDarkBlue">${res.name}</p>
-              <div class="flex items-center gap-1 mt-0.5">
-                <span class="text-[10px] text-slate-400">Warna:</span>
-                <div class="w-3.5 h-3.5 rounded-full border border-slate-400" style="background-color: ${res.scannedHex}"></div>
-              </div>
-            </div>
-          </div>
-          <div class="text-right">
-            <span class="text-lg font-black text-gameBlue">${res.score}%</span>
-            <p class="text-[9px] font-bold text-slate-400 uppercase">Akurasi</p>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-
-      playSound('fanfare');
-      confetti({
-        particleCount: 80,
-        spread: 60,
-        origin: { y: 0.6 }
-      });
-    }
-
-    function resetGameToHome() {
-      playSound('pop');
-      document.getElementById('leaderboardModal').classList.add('hidden');
-      document.getElementById('setupScreen').classList.remove('hidden');
-      document.getElementById('setupScreen').classList.add('flex');
+    function createColoredPlaceholder(hexColor, name) {
+      const c = document.createElement('canvas');
+      c.width = 150; c.height = 150;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = hexColor;
+      ctx.fillRect(0, 0, 150, 150);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = 'bold 16px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(name, 75, 80);
+      return c.toDataURL();
     }
   </script>
 </body>
